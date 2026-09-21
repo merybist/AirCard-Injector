@@ -427,6 +427,7 @@ final class InjectorViewModel: ObservableObject {
 
 struct ContentView: View {
     @StateObject private var vm = InjectorViewModel()
+    @State private var showCredits = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -450,6 +451,20 @@ struct ContentView: View {
                 }
 
                 Spacer()
+
+                // CREDITS BUTTON IN APP
+                Button {
+                    showCredits = true
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "person.2.fill")
+                        Text("Credits")
+                    }
+                    .font(.system(size: 11, weight: .semibold))
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color(red: 0.49, green: 0.23, blue: 0.93))
+                .controlSize(.regular)
 
                 // Status Badge
                 HStack(spacing: 6) {
@@ -687,6 +702,135 @@ struct ContentView: View {
         }
         .frame(width: 640, height: 690)
         .background(Color(NSColor.windowBackgroundColor))
+        .sheet(isPresented: $showCredits) {
+            CreditsModalView()
+        }
+    }
+}
+
+// MARK: - Credits Modal
+
+struct CreditsModalView: View {
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 12) {
+                ZStack {
+                    LinearGradient(
+                        colors: [Color(red: 0.49, green: 0.23, blue: 0.93), Color(red: 0.08, green: 0.53, blue: 0.95)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .frame(width: 44, height: 44)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.white)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Credits & Acknowledgements")
+                        .font(.system(size: 16, weight: .bold))
+                    Text("AirCard Injector for iOS 26+")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+
+            Divider()
+
+            VStack(spacing: 10) {
+                CreditCardRow(
+                    name: "merybist",
+                    role: "Creator of AirCard Injector • iOS 26 lockdown pairing fix • macOS GUI & DMG",
+                    url: "https://github.com/merybist",
+                    icon: "hammer.fill",
+                    color: Color(red: 0.49, green: 0.23, blue: 0.93)
+                )
+
+                CreditCardRow(
+                    name: "Mak5er",
+                    role: "Creator of AirCard-iOS • Apple Wallet card artwork replacement",
+                    url: "https://github.com/Mak5er",
+                    icon: "creditcard.fill",
+                    color: Color(red: 0.08, green: 0.53, blue: 0.95)
+                )
+
+                CreditCardRow(
+                    name: "jkcoxson",
+                    role: "Creator of idevice_pair • Rust idevice ecosystem for RemotePairing",
+                    url: "https://github.com/jkcoxson/idevice_pair",
+                    icon: "key.horizontal.fill",
+                    color: Color(red: 0.12, green: 0.65, blue: 0.53)
+                )
+            }
+
+            Divider()
+
+            HStack {
+                Text("Crafted for iOS 26+ pairing automation")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                Spacer()
+                Button("Done") {
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+                .buttonStyle(.borderedProminent)
+                .tint(Color(red: 0.49, green: 0.23, blue: 0.93))
+                .controlSize(.regular)
+            }
+        }
+        .padding(20)
+        .frame(width: 480)
+        .background(Color(NSColor.windowBackgroundColor))
+    }
+}
+
+struct CreditCardRow: View {
+    let name: String
+    let role: String
+    let url: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.12))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.system(size: 15))
+                    .foregroundStyle(color)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(name)
+                        .font(.system(size: 13, weight: .semibold))
+                    Spacer()
+                    Link(destination: URL(string: url)!) {
+                        HStack(spacing: 3) {
+                            Text("GitHub")
+                                .font(.system(size: 10, weight: .medium))
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 9))
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                }
+                Text(role)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(10)
+        .background(Color(NSColor.controlBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
