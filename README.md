@@ -18,12 +18,12 @@
 
 ---
 
-## ⚠️ The Problem: Why AirCard-iOS Fails on iOS 26+
+## ⚠️ The Problem: Why AirCard-iOS Fails on iOS 26
 
 [AirCard-iOS](https://github.com/Mak5er/AirCard-iOS) is an awesome app by [@Mak5er](https://github.com/Mak5er) that lets you change your Apple Wallet card skins without a jailbreak.
 
 However, **if you are running iOS 26 or newer, AirCard-iOS simply will not pair**:
-- The on-device pairing feature in Developer Mode (`Pair on This iPhone`) does not work on iOS 26+.
+- The on-device pairing feature in Developer Mode (`Pair on This iPhone`) does not work on iOS 26.
 - The internal service throws errors like `Connection reset by peer` or `TunnelFailurePairVerify`.
 - Without a valid pairing file, the live card scanner fails and cards cannot be customized.
 
@@ -74,7 +74,6 @@ The compiled image will be located in `build/AirCardInjector.dmg`.
 
 ## 🤝 Credits
 
-* **[@merybist](https://github.com/merybist)** — Creator of AirCard Injector, iOS 26+ pairing fix, macOS app & DMG installer.
 * **[@Mak5er](https://github.com/Mak5er)** — Creator of **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)**.
 * **[@jkcoxson](https://github.com/jkcoxson)** — Creator of **[idevice_pair](https://github.com/jkcoxson/idevice_pair)**.
 
