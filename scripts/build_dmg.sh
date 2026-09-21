@@ -63,8 +63,17 @@ if [ -f "$ROOT/assets/AppIcon.icns" ]; then
 fi
 
 if [ -d "/Applications/idevice_pair.app" ]; then
-    echo "==> Embedding idevice_pair.app helper inside AirCardInjector.app..."
+    echo "==> Embedding idevice_pair.app from /Applications..."
     cp -R "/Applications/idevice_pair.app" "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/"
+    codesign --force --deep --sign - "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/idevice_pair.app"
+else
+    echo "==> Downloading official idevice_pair helper from jkcoxson/idevice_pair releases..."
+    mkdir -p "$BUILD_DIR/tmp_helper"
+    curl -sL "https://github.com/jkcoxson/idevice_pair/releases/download/v1.1.0/idevice_pair--macos-universal.dmg" -o "$BUILD_DIR/tmp_helper/idevice_pair.dmg"
+    hdiutil attach "$BUILD_DIR/tmp_helper/idevice_pair.dmg" -mountpoint "$BUILD_DIR/tmp_helper/mnt" -quiet
+    cp -R "$BUILD_DIR/tmp_helper/mnt/idevice_pair.app" "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/"
+    hdiutil detach "$BUILD_DIR/tmp_helper/mnt" -quiet || true
+    rm -rf "$BUILD_DIR/tmp_helper"
     codesign --force --deep --sign - "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/idevice_pair.app"
 fi
 
