@@ -673,10 +673,10 @@ struct ContentView: View {
                             .foregroundStyle(.secondary)
                         Link("@Mak5er", destination: URL(string: "https://github.com/Mak5er")!)
                             .font(.system(size: 10, weight: .medium))
-                        Text("• Pairing engine via")
+                        Text("• idevice_pair by")
                             .font(.system(size: 10))
                             .foregroundStyle(.secondary)
-                        Link("idevice_pair", destination: URL(string: "https://libimobiledevice.org")!)
+                        Link("@jkcoxson", destination: URL(string: "https://github.com/jkcoxson/idevice_pair")!)
                             .font(.system(size: 10, weight: .medium))
                     }
                     .frame(maxWidth: .infinity, alignment: .center)

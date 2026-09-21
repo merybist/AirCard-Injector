@@ -92,7 +92,7 @@ cd AirCard-Injector
 
 * **[@merybist](https://github.com/merybist)** — Создатель и разработчик AirCard Injector, реверс-инжиниринг протокола пейринга на iOS 26, интеграция Lockdown, разработка macOS GUI и релизного DMG пайплайна.
 * **[@Mak5er](https://github.com/Mak5er)** — Автор оригинального проекта **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)**, создавший фундаментальный механизм подмены обложек Apple Wallet.
-* **[Команда libimobiledevice / idevicepair](https://libimobiledevice.org/)** (*Nikias Bassen и др.*) — Авторы ключевой библиотеки `libimobiledevice` и утилиты `idevicepair`, обеспечивших надёжное USB-сопряжение с устройствами iOS.
+* **[@jkcoxson](https://github.com/jkcoxson)** — Автор утилиты **[idevice_pair](https://github.com/jkcoxson/idevice_pair)** и Rust-экосистемы `idevice`, обеспечившей RemotePairing сопряжение с iOS.
 
 ---
 

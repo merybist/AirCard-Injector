@@ -92,7 +92,7 @@ Special thanks and appreciation to the authors and projects that made this possi
 
 * **[@merybist](https://github.com/merybist)** — Creator & maintainer of AirCard Injector, reverse-engineering iOS 26 pairing architecture, lockdown integration fix, macOS GUI tool & DMG distribution.
 * **[@Mak5er](https://github.com/Mak5er)** — Creator of the core **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)** project, revolutionizing Apple Wallet card artwork customization.
-* **[libimobiledevice / idevicepair](https://libimobiledevice.org/)** (*Nikias Bassen, et al.*) — Authors of `libimobiledevice` and the `idevicepair` protocol implementation enabling trusted USB communication with iOS devices.
+* **[@jkcoxson](https://github.com/jkcoxson)** — Creator of **[idevice_pair](https://github.com/jkcoxson/idevice_pair)** and the `idevice` Rust ecosystem enabling RemotePairing and pairing setup on iOS.
 
 ---
 
