@@ -1,101 +1,85 @@
-# AirCard Injector (Фикс пейринга для iOS 26+)
+# AirCard Injector — Фикс для AirCard-iOS на iOS 26+
 
 <p align="center">
   <img src="assets/app_icon_1024.png" width="128" height="128" alt="AirCard Injector Icon" />
 </p>
 
 <p align="center">
-  <b>Нативная утилита для macOS, позволяющая обойти ограничения on-device пейринга на iOS 26 и автоматически вшить сертификаты авторизации в AirCard-iOS.</b>
+  <b>Готовый фикс для запуска <a href="https://github.com/Mak5er/AirCard-iOS">AirCard-iOS</a> на версиях iOS 26+.</b><br>
+  Позволяет спарить iPhone по кабелю, извлечь рабочий файл сопряжения и вшить его прямо в IPA приложения AirCard, обходя ошибку пейринга в Developer Mode.
 </p>
 
 <p align="center">
-  <a href="README.md">🇬🇧 English Documentation</a> •
-  <a href="#быстрый-старт">Быстрый старт</a> •
-  <a href="#в-чём-проблема-на-ios-26">Суть проблемы на iOS 26</a> •
-  <a href="#благодарности-и-авторы-credits">Благодарности (Credits)</a>
+  <a href="README.md">🇬🇧 English Version</a> •
+  <a href="#в-чём-проблема-aircard-ios-на-ios-26">Суть проблемы</a> •
+  <a href="#как-пользоваться">Как пользоваться</a> •
+  <a href="#авторы">Авторы</a>
 </p>
 
 ---
 
-## ⚡ В чём проблема на iOS 26?
+## ⚠️ В чём проблема: почему AirCard-iOS не работает на iOS 26+?
 
-Приложение [AirCard-iOS](https://github.com/Mak5er/AirCard-iOS) позволяет менять обложки и кастомизировать дизайн банковских карт в Apple Wallet без джейлбрейка, используя петлевое VPN-соединение (`LocalDevVPN` или WireGuard в `SideStore`).
+[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS) — отличный проект от [@Mak5er](https://github.com/Mak5er), позволяющий менять дизайн карт в Apple Wallet без джейлбрейка.
 
-Однако **на iOS 26 беспроводной on-device пейринг в Developer Mode физически не работает**:
-- При попытке спаривания через `remotepairingd` на порт 49152 соединение мгновенно разрывается: `Connection reset by peer` (`TunnelFailurePairVerify`).
-- Устройство отклоняет попытки верификации через loopback (`only device-initiated pair-setup is supported`).
-
-### 💡 Решение
-
-Вместо нестабильного RPPairing, **AirCard Injector** использует штатный протокол **Lockdown Pairing Record** (работающий по порту `62078` через локальный VPN):
-1. Вы один раз подключаете iPhone к Mac по кабелю и нажимаете спаривание через встроенный `idevice_pair`.
-2. Извлекается официальный сертификатный файл со всеми криптографическими ключами.
-3. AirCard Injector автоматически вшивает `pairingFile.plist` внутрь Payload установочного пакета `AirCard-iOS.ipa`.
-4. На выходе получается готовый `AirCard-Injected.ipa`, который сразу подключается к сервису без необходимости настраивать Developer Mode на самом телефоне!
+Но **на iOS 26 и новее приложение стандартно не работает**:
+- Встроенная функция беспроводного пейринга в Developer Mode (`Pair on This iPhone`) на iOS 26+ сломана или отсутствует.
+- Приложение выдаёт бесконечные ошибки соединения (`Connection reset by peer`, `TunnelFailurePairVerify`).
+- Без правильного файла сопряжения сканер карт не запускается, и обложки поменять невозможно.
 
 ---
 
-## ✨ Возможности
+## 💡 Как этот фикс решает проблему?
 
-- 🖥️ **Нативный macOS SwiftUI интерфейс**: Стильный, быстрый и отзывчивый дизайн.
-- 🍏 **Universal Binary**: Скомпилирован под Apple Silicon (M1/M2/M3/M4) и процессоры Intel.
-- 🔌 **Встроенный генератор ключей**: Запускает `idevice_pair` для спаривания по USB за несколько секунд без Xcode и платного аккаунта Apple Developer.
-- 🔍 **Умный анализ файлов**: Автоматически проверяет валидность сертификатов (`alt_irk`, `DeviceCertificate`, `HostPrivateKey`).
-- 📦 **Автоматическая инжекция**: Патчит IPA на лету, не нарушая целостность бандла.
-- 🚀 **Совместимость**: Работает с **SideStore**, **LiveContainer**, **TrollStore**, **AltStore** и **iLoader**.
+**AirCard Injector** — это утилита для macOS, которая решает проблему в несколько кликов:
+
+1. **Один раз спаривает iPhone по проводу**: с помощью встроенного модуля `idevice_pair` от [@jkcoxson](https://github.com/jkcoxson).
+2. **Забирает валидные ключи**: автоматически находит и проверяет сгенерированный `pairingFile.plist`.
+3. **Вшивает файл прямо в AirCard-iOS**: берёт оригинальный `AirCard-iOS.ipa` и добавляет файлы авторизации внутрь пакета.
+4. **Готовый результат**: на выходе получается пропатченный `AirCard-Injected.ipa`, который сразу видит карты через ваш локальный VPN (`LocalDevVPN` / `SideStore WireGuard`) без каких-либо ошибок!
 
 ---
 
-## 🚀 Быстрый старт
+## 🚀 Как пользоваться
 
-### 1. Скачивание
-Скачайте готовый `AirCardInjector.dmg` со страницы [**Releases**](https://github.com/merybist/AirCard-Injector/releases), откройте его и перетащите `AirCardInjector.app` в папку «Программы» (Applications).
+### Шаг 1. Скачайте AirCard Injector
+Скачайте образ **`AirCardInjector.dmg`** со страницы [**Releases**](https://github.com/merybist/AirCard-Injector/releases), откройте его и перетащите программу в папку `Applications` (Программы).
 
-### 2. Пейринг по кабелю
-1. Подключите iPhone к Mac через провод Lightning / USB-C.
-2. На экране iPhone выберите **«Доверять этому компьютеру»** и введите код-пароль разблокировки.
-3. В приложении AirCard Injector нажмите синюю кнопку **«Launch Key Generator (idevice_pair)»**.
-4. Завершите спаривание в один клик. Программа автоматически обнаружит сгенерированный файл!
+### Шаг 2. Подключите iPhone по кабелю
+1. Подключите iPhone к Mac через провод Lightning / Type-C.
+2. На экране телефона нажмите **«Доверять этому компьютеру»** и введите код разблокировки.
+3. Откройте **AirCard Injector** и нажмите синюю кнопку **Launch Key Generator (idevice_pair)**.
+4. Завершите сопряжение. Программа сама подхватит полученный файл ключей!
 
-### 3. Выбор базового IPA
-В блоке Step 2 укажите путь к оригинальному `AirCard-iOS.ipa` (или нажмите *Download Latest Release from GitHub*).
+### Шаг 3. Выберите базовый IPA
+В блоке Step 2 укажите оригинальный `AirCard-iOS.ipa` (или нажмите *Download Latest Release from GitHub*, чтобы скачать официальный билд).
 
-### 4. Инжекция и установка
-1. Нажмите кнопку **«Inject Pairing & Generate IPA»**.
-2. Установите полученный файл `AirCard-Injected.ipa` на iPhone через SideStore, LiveContainer, TrollStore или AltStore.
-3. Включите петлевой VPN (`LocalDevVPN` или SideStore WireGuard), запустите AirCard и меняйте обложки карт в Wallet!
+### Шаг 4. Нажмите Inject и установите
+1. Нажмите **Inject Pairing & Generate IPA**.
+2. Установите готовый `AirCard-Injected.ipa` на телефон через **SideStore**, **LiveContainer**, **TrollStore** или **AltStore**.
+3. Включите петлевой VPN (`LocalDevVPN` или SideStore WireGuard), откройте AirCard и спокойно меняйте обложки в Wallet!
 
 ---
 
 ## 🛠️ Сборка из исходников
 
-Требования:
-- macOS 14.0 или новее
-- Xcode Command Line Tools (`xcode-select --install`)
-- Опционально: `create-dmg` (`brew install create-dmg`)
-
-Сборка:
 ```bash
 git clone https://github.com/merybist/AirCard-Injector.git
 cd AirCard-Injector
-
-# Сборка Universal binary и оформленного DMG
 ./scripts/build_dmg.sh
 ```
-Готовый образ появится по пути `build/AirCardInjector.dmg`.
+Готовый DMG появится в `build/AirCardInjector.dmg`.
 
 ---
 
-## 🤝 Благодарности и авторы (Credits)
+## 🤝 Авторы
 
-Огромная благодарность разработчикам и проектам, благодаря которым это стало возможным:
-
-* **[@merybist](https://github.com/merybist)** — Создатель и разработчик AirCard Injector, реверс-инжиниринг протокола пейринга на iOS 26, интеграция Lockdown, разработка macOS GUI и релизного DMG пайплайна.
-* **[@Mak5er](https://github.com/Mak5er)** — Автор оригинального проекта **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)**, создавший фундаментальный механизм подмены обложек Apple Wallet.
-* **[@jkcoxson](https://github.com/jkcoxson)** — Автор утилиты **[idevice_pair](https://github.com/jkcoxson/idevice_pair)** и Rust-экосистемы `idevice`, обеспечившей RemotePairing сопряжение с iOS.
+* **[@merybist](https://github.com/merybist)** — Создатель AirCard Injector, разработка фикса пейринга для iOS 26+, macOS приложение и DMG установщик.
+* **[@Mak5er](https://github.com/Mak5er)** — Создатель **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)**.
+* **[@jkcoxson](https://github.com/jkcoxson)** — Автор утилиты **[idevice_pair](https://github.com/jkcoxson/idevice_pair)**.
 
 ---
 
 ## 📄 Лицензия
 
-Проект распространяется под лицензией [MIT](LICENSE).
+MIT License. Подробнее в файле [LICENSE](LICENSE).
