@@ -93,7 +93,6 @@ Special thanks and appreciation to the authors and projects that made this possi
 * **[@merybist](https://github.com/merybist)** — Creator & maintainer of AirCard Injector, reverse-engineering iOS 26 pairing architecture, lockdown integration fix, macOS GUI tool & DMG distribution.
 * **[@Mak5er](https://github.com/Mak5er)** — Creator of the core **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)** project, revolutionizing Apple Wallet card artwork customization.
 * **[libimobiledevice / idevicepair](https://libimobiledevice.org/)** (*Nikias Bassen, et al.*) — Authors of `libimobiledevice` and the `idevicepair` protocol implementation enabling trusted USB communication with iOS devices.
-* **[@0xjohnnydev](https://github.com/0xjohnnydev)** / **AirLift** — Foundation research into loopback VPN tunneling on iOS.
 
 ---
 
