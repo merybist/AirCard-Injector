@@ -18,12 +18,12 @@
 
 ---
 
-## ⚠️ В чём проблема: почему AirCard-iOS не работает на iOS 26+?
+## ⚠️ В чём проблема: почему AirCard-iOS не работает на iOS 26?
 
-[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS) — отличный проект от [@Mak5er](https://github.com/Mak5er), позволяющий менять дизайн карт в Apple Wallet без джейлбрейка.
+[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS) — проект от [@Mak5er](https://github.com/Mak5er), позволяющий менять дизайн карт в Apple Wallet без джейлбрейка.
 
 Но **на iOS 26 и новее приложение стандартно не работает**:
-- Встроенная функция беспроводного пейринга в Developer Mode (`Pair on This iPhone`) на iOS 26+ сломана или отсутствует.
+- Встроенная функция беспроводного пейринга в Developer Mode (`Pair on This iPhone`) на iOS 26 сломана или отсутствует.
 - Приложение выдаёт бесконечные ошибки соединения (`Connection reset by peer`, `TunnelFailurePairVerify`).
 - Без правильного файла сопряжения сканер карт не запускается, и обложки поменять невозможно.
 
@@ -74,7 +74,6 @@ cd AirCard-Injector
 
 ## 🤝 Авторы
 
-* **[@merybist](https://github.com/merybist)** — Создатель AirCard Injector, разработка фикса пейринга для iOS 26+, macOS приложение и DMG установщик.
 * **[@Mak5er](https://github.com/Mak5er)** — Создатель **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)**.
 * **[@jkcoxson](https://github.com/jkcoxson)** — Автор утилиты **[idevice_pair](https://github.com/jkcoxson/idevice_pair)**.
 
