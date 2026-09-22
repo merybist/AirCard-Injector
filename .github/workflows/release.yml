@@ -11,23 +11,32 @@ permissions:
 
 jobs:
   build:
-    name: Build & Package DMG
+    name: Verify, Build & Package DMG
     runs-on: macos-14
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install build tools
+      - name: Verify Swift sources
         run: |
-          brew install create-dmg
+          mkdir -p .build/module-cache
+          xcrun swiftc -swift-version 6 -module-cache-path .build/module-cache -parse-as-library -typecheck src/main.swift src/USBDeviceDetector.swift src/CommandRunner.swift
+          xcrun swiftc -module-cache-path .build/module-cache src/USBDeviceDetector.swift tests/USBDeviceDetectorTests.swift -o .build/usb-device-detector-tests
+          .build/usb-device-detector-tests
+          xcrun swiftc -module-cache-path .build/module-cache src/CommandRunner.swift tests/CommandRunnerTests.swift -o .build/command-runner-tests
+          .build/command-runner-tests
+          bash -n scripts/build_dmg.sh
 
-      - name: Build Application & DMG
-        run: |
-          ./scripts/build_dmg.sh
+      - name: Install packaging tool
+        run: brew install create-dmg
+
+      - name: Build application and DMG
+        run: ./scripts/build_dmg.sh
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: build/AirCardInjector.dmg
+          fail_on_unmatched_files: true
           generate_release_notes: true

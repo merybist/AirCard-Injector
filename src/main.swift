@@ -29,7 +29,7 @@ enum PairingType {
         switch self {
         case .none: return "No pairing file selected"
         case .lockdown: return "Legacy Lockdown Record (USB only)"
-        case .rpPairingComplete: return "RemotePairing Record with alt_irk (Verified for iOS 26+)"
+        case .rpPairingComplete: return "RemotePairing Record (alt_irk present)"
         case .rpPairingIncomplete: return "RemotePairing Record (Missing alt_irk key)"
         case .custom: return "Custom Property List"
         }
@@ -39,7 +39,7 @@ enum PairingType {
         switch self {
         case .none: return "Awaiting File"
         case .lockdown: return "Legacy Lockdown"
-        case .rpPairingComplete: return "iOS 26 Ready ✅"
+        case .rpPairingComplete: return "RemotePairing ready ✅"
         case .rpPairingIncomplete: return "Missing alt_irk ⚠️"
         case .custom: return "Custom .plist"
         }
@@ -80,11 +80,13 @@ final class InjectorViewModel: ObservableObject {
     @Published var progressMessage: String = ""
     @Published var generatedIPAURL: URL? = nil
     @Published var logs: [String] = []
+    @Published var usbConnectionStatus: USBConnectionStatus = .checking
 
     private var watchTimer: Timer?
 
     init() {
         autoDetectPairingFile()
+        refreshUSBConnectionStatus()
         fetchReleases()
     }
 
@@ -144,7 +146,50 @@ final class InjectorViewModel: ObservableObject {
         }
     }
 
+    var hasUSBConnectedIPhone: Bool {
+        if case .connected = usbConnectionStatus { return true }
+        return false
+    }
+
+    var usbConnectionColor: Color {
+        switch usbConnectionStatus {
+        case .checking: return .secondary
+        case .connected: return .green
+        case .disconnected: return .orange
+        case .unavailable: return .red
+        }
+    }
+
+    func refreshUSBConnectionStatus() {
+        usbConnectionStatus = .checking
+        log("Checking USB for a connected iPhone...")
+
+        Task { [weak self] in
+            let status = await Task.detached(priority: .userInitiated) {
+                USBDeviceDetector.currentConnectionStatus()
+            }.value
+
+            guard let self else { return }
+            self.usbConnectionStatus = status
+            switch status {
+            case let .connected(name):
+                self.log("USB check: connected iPhone detected (\(name)).")
+            case .disconnected:
+                self.log("USB check: no iPhone detected. Connect an unlocked iPhone by USB and tap Refresh.")
+            case .unavailable:
+                self.log("USB check: system_profiler was unavailable.")
+            case .checking:
+                break
+            }
+        }
+    }
+
     func launchIdevicePair() {
+        guard hasUSBConnectedIPhone else {
+            log("Connect an unlocked iPhone via USB, then refresh the connection check before launching idevice_pair.")
+            return
+        }
+
         let embedded = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/idevice_pair.app").path
         let appPaths = [
             embedded,
@@ -361,11 +406,10 @@ final class InjectorViewModel: ObservableObject {
                 try FileManager.default.createDirectory(at: tempWorkspace, withIntermediateDirectories: true)
                 defer { try? FileManager.default.removeItem(at: tempWorkspace) }
 
-                let unzipProcess = Process()
-                unzipProcess.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-                unzipProcess.arguments = ["-q", baseIPAPath.path, "-d", tempWorkspace.path]
-                try unzipProcess.run()
-                unzipProcess.waitUntilExit()
+                try CommandRunner.run(
+                    executable: URL(fileURLWithPath: "/usr/bin/unzip"),
+                    arguments: ["-q", baseIPAPath.path, "-d", tempWorkspace.path]
+                )
 
                 let payloadDir = tempWorkspace.appendingPathComponent("Payload")
                 let contents = try FileManager.default.contentsOfDirectory(at: payloadDir, includingPropertiesForKeys: nil)
@@ -387,12 +431,11 @@ final class InjectorViewModel: ObservableObject {
                 await self.log("Creating output archive...")
 
                 try? FileManager.default.removeItem(at: outURL)
-                let zipProcess = Process()
-                zipProcess.currentDirectoryURL = tempWorkspace
-                zipProcess.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-                zipProcess.arguments = ["-q", "-r", "-y", outURL.path, "Payload"]
-                try zipProcess.run()
-                zipProcess.waitUntilExit()
+                try CommandRunner.run(
+                    executable: URL(fileURLWithPath: "/usr/bin/zip"),
+                    arguments: ["-q", "-r", "-y", outURL.path, "Payload"],
+                    currentDirectoryURL: tempWorkspace
+                )
 
                 await self.log("Done! Personalized IPA created: \(outURL.path)")
 
@@ -432,21 +475,21 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header Bar
-            HStack(spacing: 14) {
+            HStack(spacing: 10) {
                 ZStack {
                     LinearGradient(colors: [Color.blue, Color.purple], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        .frame(width: 48, height: 48)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .frame(width: 36, height: 36)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     Image(systemName: "creditcard.and.123")
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.white)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("AirCard Injector")
-                        .font(.system(size: 20, weight: .bold))
-                    Text("Automated RemotePairing generator & IPA injector for iOS 26+")
-                        .font(.system(size: 12))
+                        .font(.system(size: 18, weight: .bold))
+                    Text("USB pairing & IPA injector for iOS 26+")
+                        .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
 
@@ -478,21 +521,37 @@ struct ContentView: View {
                 .foregroundStyle(vm.pairingType.color)
                 .clipShape(Capsule())
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
             .background(Color(NSColor.windowBackgroundColor))
 
             Divider()
 
-            ScrollView {
-                VStack(spacing: 16) {
+            VStack(spacing: 8) {
                     // STEP 1: PAIRING CARD
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Label("Step 1. Device Pairing (RemotePairing / alt_irk)", systemImage: "link.badge.plus")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
                             Spacer()
                         }
+
+                        // USB preflight
+                        HStack(spacing: 8) {
+                            Image(systemName: vm.usbConnectionStatus.symbolName)
+                                .foregroundStyle(vm.usbConnectionColor)
+                            Text(vm.usbConnectionStatus.title)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(vm.usbConnectionColor)
+                            Spacer()
+                            Button("Refresh") {
+                                vm.refreshUSBConnectionStatus()
+                            }
+                            .font(.system(size: 11, weight: .semibold))
+                        }
+                        .padding(7)
+                        .background(vm.usbConnectionColor.opacity(0.10))
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                         // Launch Generator Button
                         Button {
@@ -500,23 +559,24 @@ struct ContentView: View {
                         } label: {
                             HStack(spacing: 10) {
                                 Image(systemName: "key.horizontal.fill")
-                                    .font(.system(size: 16))
-                                VStack(alignment: .leading, spacing: 2) {
+                                    .font(.system(size: 14))
+                                VStack(alignment: .leading, spacing: 1) {
                                     Text("Launch Key Generator (idevice_pair)")
-                                        .font(.system(size: 13, weight: .bold))
-                                    Text("Connect iPhone via USB → Select Remote Pairing → Click Pair")
-                                        .font(.system(size: 11))
+                                        .font(.system(size: 12, weight: .bold))
+                                    Text("USB → Remote Pairing → Pair")
+                                        .font(.system(size: 10))
                                         .opacity(0.85)
                                 }
                                 Spacer()
                                 Image(systemName: "arrow.up.forward.app")
                                     .font(.system(size: 14))
                             }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.blue)
+                        .disabled(!vm.hasUSBConnectedIPhone)
 
                         // Path Picker Row
                         HStack(spacing: 8) {
@@ -545,15 +605,15 @@ struct ContentView: View {
                                 .foregroundStyle(vm.pairingType.color)
                         }
                     }
-                    .padding(14)
+                    .padding(10)
                     .background(Color(NSColor.controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                     // STEP 2: BASE IPA CARD
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Label("Step 2. AirCard-iOS Base Version", systemImage: "app.gift.fill")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
                             Spacer()
                             if vm.isLoadingReleases {
                                 ProgressView().scaleEffect(0.6)
@@ -587,12 +647,12 @@ struct ContentView: View {
                             }
                         }
                     }
-                    .padding(14)
+                    .padding(10)
                     .background(Color(NSColor.controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                     // STEP 3: ACTION CARD
-                    VStack(spacing: 12) {
+                    VStack(spacing: 8) {
                         Button {
                             vm.startInjection()
                         } label: {
@@ -609,7 +669,7 @@ struct ContentView: View {
                                     .font(.system(size: 14, weight: .bold))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 9)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(vm.pairingType == .rpPairingComplete ? .green : .blue)
@@ -632,7 +692,7 @@ struct ContentView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
-                    .padding(14)
+                    .padding(10)
                     .background(Color(NSColor.controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
@@ -664,7 +724,7 @@ struct ContentView: View {
                             }
                             .background(Color.black.opacity(0.85))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .frame(height: 110)
+                            .frame(height: 64)
                             .onChange(of: vm.logs.count) {
                                 if let last = vm.logs.indices.last {
                                     proxy.scrollTo(last, anchor: .bottom)
@@ -675,7 +735,7 @@ struct ContentView: View {
 
                     // CREDITS FOOTER
                     HStack(spacing: 4) {
-                        Text("AirCard Injector v2.0")
+                        Text("AirCard Injector v2.0.1")
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(.secondary)
                         Text("• Fix by")
@@ -695,12 +755,11 @@ struct ContentView: View {
                             .font(.system(size: 10, weight: .medium))
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, 4)
-                }
-                .padding(20)
+                    .padding(.top, 0)
             }
+            .padding(12)
         }
-        .frame(width: 640, height: 690)
+        .frame(width: 640, height: 650)
         .background(Color(NSColor.windowBackgroundColor))
         .sheet(isPresented: $showCredits) {
             CreditsModalView()

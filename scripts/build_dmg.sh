@@ -8,18 +8,28 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/AirCardInjector.app/Contents/MacOS"
 mkdir -p "$BUILD_DIR/AirCardInjector.app/Contents/Resources"
 mkdir -p "$BUILD_DIR/AirCardInjector.app/Contents/Helpers"
+MODULE_CACHE="$BUILD_DIR/module-cache"
+mkdir -p "$MODULE_CACHE"
 
 echo "==> Compiling native macOS SwiftUI Universal binary (arm64 + x86_64)..."
 xcrun -sdk macosx swiftc -O \
+    -swift-version 6 \
+    -module-cache-path "$MODULE_CACHE" \
     -parse-as-library \
     -target arm64-apple-macos14.0 \
     "$ROOT/src/main.swift" \
+    "$ROOT/src/USBDeviceDetector.swift" \
+    "$ROOT/src/CommandRunner.swift" \
     -o "$BUILD_DIR/AirCardInjector-arm64"
 
 xcrun -sdk macosx swiftc -O \
+    -swift-version 6 \
+    -module-cache-path "$MODULE_CACHE" \
     -parse-as-library \
     -target x86_64-apple-macos14.0 \
     "$ROOT/src/main.swift" \
+    "$ROOT/src/USBDeviceDetector.swift" \
+    "$ROOT/src/CommandRunner.swift" \
     -o "$BUILD_DIR/AirCardInjector-x86_64"
 
 lipo -create \
@@ -46,9 +56,9 @@ cat << 'EOF' > "$BUILD_DIR/AirCardInjector.app/Contents/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>2.0</string>
+    <string>2.0.1</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>
@@ -68,11 +78,12 @@ if [ -d "/Applications/idevice_pair.app" ]; then
     codesign --force --deep --sign - "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/idevice_pair.app"
 else
     echo "==> Downloading official idevice_pair helper from jkcoxson/idevice_pair releases..."
-    mkdir -p "$BUILD_DIR/tmp_helper"
-    curl -sL "https://github.com/jkcoxson/idevice_pair/releases/download/v1.1.0/idevice_pair--macos-universal.dmg" -o "$BUILD_DIR/tmp_helper/idevice_pair.dmg"
+    mkdir -p "$BUILD_DIR/tmp_helper/mnt"
+    curl --fail --show-error --location --retry 3 "https://github.com/jkcoxson/idevice_pair/releases/download/v1.1.0/idevice_pair--macos-universal.dmg" -o "$BUILD_DIR/tmp_helper/idevice_pair.dmg"
     hdiutil attach "$BUILD_DIR/tmp_helper/idevice_pair.dmg" -mountpoint "$BUILD_DIR/tmp_helper/mnt" -quiet
+    test -d "$BUILD_DIR/tmp_helper/mnt/idevice_pair.app"
     cp -R "$BUILD_DIR/tmp_helper/mnt/idevice_pair.app" "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/"
-    hdiutil detach "$BUILD_DIR/tmp_helper/mnt" -quiet || true
+    hdiutil detach "$BUILD_DIR/tmp_helper/mnt" -quiet
     rm -rf "$BUILD_DIR/tmp_helper"
     codesign --force --deep --sign - "$BUILD_DIR/AirCardInjector.app/Contents/Helpers/idevice_pair.app"
 fi
@@ -90,7 +101,7 @@ mkdir -p "$DMG_CONTENT"
 echo "==> Preparing DMG staging directory..."
 cp -R "$BUILD_DIR/AirCardInjector.app" "$DMG_CONTENT/"
 
-BG_IMG="$ROOT/assets/dmg_background.png"
+BG_IMG="$ROOT/assets/dmg_background_v2.png"
 VOL_ICON="$ROOT/assets/AppIcon.icns"
 
 echo "==> Creating custom styled DMG with create-dmg..."
@@ -108,7 +119,7 @@ if command -v create-dmg >/dev/null 2>&1; then
         --app-drop-link 485 195 \
         --no-internet-enable \
         "$DMG_PATH" \
-        "$DMG_CONTENT" || true
+        "$DMG_CONTENT"
 else
     echo "create-dmg not found, falling back to hdiutil..."
     hdiutil create -volname "AirCard Injector" -srcfolder "$DMG_CONTENT" -ov -format UDZO "$DMG_PATH"

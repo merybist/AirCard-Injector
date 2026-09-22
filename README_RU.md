@@ -1,84 +1,82 @@
-# AirCard Injector — Фикс для AirCard-iOS на iOS 26+
+# AirCard Injector — USB-помощник для AirCard-iOS на iOS 26 и новее
 
 <p align="center">
-  <img src="assets/app_icon_1024.png" width="128" height="128" alt="AirCard Injector Icon" />
+  <img src="assets/app_icon_1024.png" width="128" height="128" alt="Иконка AirCard Injector" />
 </p>
 
 <p align="center">
-  <b>Готовый фикс для запуска <a href="https://github.com/Mak5er/AirCard-iOS">AirCard-iOS</a> на версиях iOS 26+.</b><br>
-  Позволяет спарить iPhone по кабелю, извлечь рабочий файл сопряжения и вшить его прямо в IPA приложения AirCard, обходя ошибку пейринга в Developer Mode.
+  Небольшая macOS-утилита для <a href="https://github.com/Mak5er/AirCard-iOS">AirCard-iOS</a>.<br>
+  Она создаёт pairing-запись по USB, находит <code>pairingFile.plist</code> и добавляет его в IPA AirCard.
 </p>
 
 <p align="center">
-  <a href="README.md">🇬🇧 English Version</a> •
-  <a href="#в-чём-проблема-aircard-ios-на-ios-26">Суть проблемы</a> •
+  <a href="README.md">🇬🇧 English version</a> •
+  <a href="#демо">Демо</a> •
+  <a href="#требования">Требования</a> •
   <a href="#как-пользоваться">Как пользоваться</a> •
-  <a href="#авторы">Авторы</a>
+  <a href="#решение-проблем">Решение проблем</a>
 </p>
 
 ---
 
-## ⚠️ В чём проблема: почему AirCard-iOS не работает на iOS 26?
+## Зачем это нужно
 
-[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS) — проект от [@Mak5er](https://github.com/Mak5er), позволяющий менять дизайн карт в Apple Wallet без джейлбрейка.
+На iOS 26 и новее сценарий **Pair on This iPhone** в Developer Mode может быть недоступен или завершаться ошибкой для AirCard-iOS. AirCard Injector даёт macOS-путь через USB для создания pairing-записи, необходимой AirCard.
 
-Но **на iOS 26 и новее приложение стандартно не работает**:
-- Встроенная функция беспроводного пейринга в Developer Mode (`Pair on This iPhone`) на iOS 26 сломана или отсутствует.
-- Приложение выдаёт бесконечные ошибки соединения (`Connection reset by peer`, `TunnelFailurePairVerify`).
-- Без правильного файла сопряжения сканер карт не запускается, и обложки поменять невозможно.
+Утилита использует [idevice_pair](https://github.com/jkcoxson/idevice_pair) от [@jkcoxson](https://github.com/jkcoxson), затем упаковывает выбранный pairing-файл в IPA AirCard.
 
----
+## Демо
 
-## 💡 Как этот фикс решает проблему?
+> **Placeholder — добавь сюда GIF на 20–30 секунд:** iPhone подключается по USB → **Refresh** → запуск генератора → найден pairing-файл → создан IPA. Замажь имя устройства и никогда не показывай содержимое pairing-файла.
 
-**AirCard Injector** — это утилита для macOS, которая решает проблему в несколько кликов:
+## Требования
 
-1. **Один раз спаривает iPhone по проводу**: с помощью встроенного модуля `idevice_pair` от [@jkcoxson](https://github.com/jkcoxson).
-2. **Забирает валидные ключи**: автоматически находит и проверяет сгенерированный `pairingFile.plist`.
-3. **Вшивает файл прямо в AirCard-iOS**: берёт оригинальный `AirCard-iOS.ipa` и добавляет файлы авторизации внутрь пакета.
-4. **Готовый результат**: на выходе получается пропатченный `AirCard-Injected.ipa`, который сразу видит карты через ваш локальный VPN (`LocalDevVPN` / `SideStore WireGuard`) без каких-либо ошибок!
+- macOS 14 или новее.
+- iPhone, подключённый **кабелем с передачей данных**, разблокированный и доверяющий Mac.
+- Оригинальный `AirCard-iOS.ipa`: его можно выбрать на диске или скачать через список релизов.
+- Способ установить созданный IPA: SideStore, LiveContainer, TrollStore или AltStore.
 
----
+> **Placeholder — добавь таблицу протестированной совместимости:** проверенные сборки iOS, версии AirCard-iOS и Mac на Apple Silicon/Intel.
 
-## 🚀 Как пользоваться
+## Как пользоваться
 
-### Шаг 1. Скачайте AirCard Injector
-Скачайте образ **`AirCardInjector.dmg`** со страницы [**Releases**](https://github.com/merybist/AirCard-Injector/releases), откройте его и перетащите программу в папку `Applications` (Программы).
+1. Скачай `AirCardInjector.dmg` из [Releases](https://github.com/merybist/AirCard-Injector/releases), открой образ и перетащи программу в `Applications`.
+2. Подключи и разблокируй iPhone. Если появится запрос, нажми **Trust This Computer**.
+3. В **Step 1** убедись, что приложение показывает **iPhone connected via USB**. После переподключения кабеля или телефона нажми **Refresh**.
+4. Нажми **Launch Key Generator (idevice_pair)** и закончи pairing по USB. AirCard Injector следит за `Documents` и `Downloads`; pairing-файл также можно выбрать вручную.
+5. В **Step 2** выбери релиз AirCard-iOS или локальный `.ipa`.
+6. Нажми **Inject Pairing & Create Ready IPA**, выбери место сохранения и установи получившийся IPA привычным sideload-инструментом.
 
-### Шаг 2. Подключите iPhone по кабелю
-1. Подключите iPhone к Mac через провод Lightning / Type-C.
-2. На экране телефона нажмите **«Доверять этому компьютеру»** и введите код разблокировки.
-3. Откройте **AirCard Injector** и нажмите синюю кнопку **Launch Key Generator (idevice_pair)**.
-4. Завершите сопряжение. Программа сама подхватит полученный файл ключей!
+Исходный IPA не перезаписывается: окно сохранения создаёт отдельный персонализированный IPA.
 
-### Шаг 3. Выберите базовый IPA
-В блоке Step 2 укажите оригинальный `AirCard-iOS.ipa` (или нажмите *Download Latest Release from GitHub*, чтобы скачать официальный билд).
+## Решение проблем
 
-### Шаг 4. Нажмите Inject и установите
-1. Нажмите **Inject Pairing & Generate IPA**.
-2. Установите готовый `AirCard-Injected.ipa` на телефон через **SideStore**, **LiveContainer**, **TrollStore** или **AltStore**.
-3. Включите петлевой VPN (`LocalDevVPN` или SideStore WireGuard), откройте AirCard и спокойно меняйте обложки в Wallet!
+| Что видно | Что сделать |
+| --- | --- |
+| **No iPhone detected via USB** | Разблокируй iPhone, используй кабель с передачей данных, переподключи устройство, подтверди **Trust This Computer** и нажми **Refresh**. |
+| Генератор открылся, но pairing-файл не найден | Закончи pairing в `idevice_pair`; если файл не лежит в `Documents` или `Downloads`, выбери его вручную через **Browse…**. |
+| В списке нет релиза AirCard | Нажми **Custom .ipa…** и выбери оригинальный локальный IPA AirCard-iOS. |
+| Инъекция не удалась | Проверь, что IPA — корректный архив с `Payload/*.app`, затем повтори операцию, выбрав новое имя выходного файла. |
 
----
+## Приватность
 
-## 🛠️ Сборка из исходников
+Pairing-файл содержит учётные данные, привязанные к устройству. Не публикуй его в issue, твитах, скриншотах или чатах.
+
+## Сборка из исходников
 
 ```bash
 git clone https://github.com/merybist/AirCard-Injector.git
 cd AirCard-Injector
 ./scripts/build_dmg.sh
 ```
-Готовый DMG появится в `build/AirCardInjector.dmg`.
 
----
+DMG появится по пути `build/AirCardInjector.dmg`.
 
-## 🤝 Авторы
+## Благодарности
 
-* **[@Mak5er](https://github.com/Mak5er)** — Создатель **[AirCard-iOS](https://github.com/Mak5er/AirCard-iOS)**.
-* **[@jkcoxson](https://github.com/jkcoxson)** — Автор утилиты **[idevice_pair](https://github.com/jkcoxson/idevice_pair)**.
+- [@Mak5er](https://github.com/Mak5er) — автор [AirCard-iOS](https://github.com/Mak5er/AirCard-iOS).
+- [@jkcoxson](https://github.com/jkcoxson) — автор [idevice_pair](https://github.com/jkcoxson/idevice_pair).
 
----
+## Лицензия
 
-## 📄 Лицензия
-
-MIT License. Подробнее в файле [LICENSE](LICENSE).
+MIT. Подробнее — в [LICENSE](LICENSE).
