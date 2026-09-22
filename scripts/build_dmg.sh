@@ -13,7 +13,7 @@ mkdir -p "$MODULE_CACHE"
 
 echo "==> Compiling native macOS SwiftUI Universal binary (arm64 + x86_64)..."
 xcrun -sdk macosx swiftc -O \
-    -swift-version 6 \
+    -swift-version 5 \
     -module-cache-path "$MODULE_CACHE" \
     -parse-as-library \
     -target arm64-apple-macos14.0 \
@@ -23,7 +23,7 @@ xcrun -sdk macosx swiftc -O \
     -o "$BUILD_DIR/AirCardInjector-arm64"
 
 xcrun -sdk macosx swiftc -O \
-    -swift-version 6 \
+    -swift-version 5 \
     -module-cache-path "$MODULE_CACHE" \
     -parse-as-library \
     -target x86_64-apple-macos14.0 \

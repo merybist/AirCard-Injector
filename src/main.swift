@@ -213,26 +213,31 @@ final class InjectorViewModel: ObservableObject {
         watchTimer?.invalidate()
         log("Listening for new pairing file in ~/Documents or ~/Downloads...")
         watchTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                guard let self = self else { return }
-                let checkPaths = [
-                    NSHomeDirectory() + "/Documents/pairingFile.plist",
-                    NSHomeDirectory() + "/Downloads/pairingFile.plist"
-                ]
-                for p in checkPaths {
-                    if let attrs = try? FileManager.default.attributesOfItem(atPath: p),
-                       let modDate = attrs[.modificationDate] as? Date,
-                       Date().timeIntervalSince(modDate) < 120 {
-                        if let data = try? Data(contentsOf: URL(fileURLWithPath: p)),
-                           let dict = (try? PropertyListSerialization.propertyList(from: data, format: nil)) as? [String: Any],
-                           dict["alt_irk"] != nil {
-                            self.setPairingFile(path: p)
-                            self.log("Success: Auto-detected fresh pairing file with alt_irk: \(URL(fileURLWithPath: p).lastPathComponent)")
-                            self.watchTimer?.invalidate()
-                            self.watchTimer = nil
-                            return
-                        }
-                    }
+            let viewModel = self
+            Task { @MainActor [weak viewModel] in
+                guard let viewModel else { return }
+                viewModel.detectFreshPairingFile()
+            }
+        }
+    }
+
+    private func detectFreshPairingFile() {
+        let checkPaths = [
+            NSHomeDirectory() + "/Documents/pairingFile.plist",
+            NSHomeDirectory() + "/Downloads/pairingFile.plist"
+        ]
+        for path in checkPaths {
+            if let attrs = try? FileManager.default.attributesOfItem(atPath: path),
+               let modDate = attrs[.modificationDate] as? Date,
+               Date().timeIntervalSince(modDate) < 120 {
+                if let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+                   let dict = (try? PropertyListSerialization.propertyList(from: data, format: nil)) as? [String: Any],
+                   dict["alt_irk"] != nil {
+                    setPairingFile(path: path)
+                    log("Success: Auto-detected fresh pairing file with alt_irk: \(URL(fileURLWithPath: path).lastPathComponent)")
+                    watchTimer?.invalidate()
+                    watchTimer = nil
+                    return
                 }
             }
         }
