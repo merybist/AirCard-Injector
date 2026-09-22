@@ -27,7 +27,9 @@ It uses [idevice_pair](https://github.com/jkcoxson/idevice_pair) by [@jkcoxson](
 
 ## Demo
 
-> **Placeholder — add a 20–30 second GIF here:** connect an iPhone by USB → click **Refresh** → launch the generator → pairing file is found → create the IPA. Blur device names and never show the contents of a pairing file.
+<p align="center">
+  <img src="https://github.com/merybist/merybist/blob/865efa28afb07cd3f5b4f9bbf6473852dcf642be/0923.gif?raw=true" alt="AirCard Injector demo" width="640" />
+</p>
 
 ## Requirements
 
@@ -36,7 +38,17 @@ It uses [idevice_pair](https://github.com/jkcoxson/idevice_pair) by [@jkcoxson](
 - An original `AirCard-iOS.ipa`, either selected locally or downloaded from the release picker.
 - A sideloading method for the generated IPA, such as SideStore, LiveContainer, TrollStore, or AltStore.
 
-> **Placeholder — add a tested-compatibility table:** the iOS builds, AirCard-iOS versions, and Apple Silicon/Intel Macs you verified.
+## Tested compatibility
+
+| Component | Verified setup |
+| --- | --- |
+| iPhone | iPhone 14 Pro |
+| iOS | 26.5.2 |
+| AirCard-iOS | v1.3 |
+| AirCard Injector | v2.0.1 |
+| Mac | iMac (iMac19,1), Intel Core i5 |
+| macOS | 15.7.7 |
+| Architecture | Intel (x86_64) |
 
 ## How to use
 

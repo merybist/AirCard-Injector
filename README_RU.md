@@ -27,7 +27,9 @@
 
 ## Демо
 
-> **Placeholder — добавь сюда GIF на 20–30 секунд:** iPhone подключается по USB → **Refresh** → запуск генератора → найден pairing-файл → создан IPA. Замажь имя устройства и никогда не показывай содержимое pairing-файла.
+<p align="center">
+  <img src="https://github.com/merybist/merybist/blob/865efa28afb07cd3f5b4f9bbf6473852dcf642be/0923.gif?raw=true" alt="Демо AirCard Injector" width="640" />
+</p>
 
 ## Требования
 
@@ -36,7 +38,17 @@
 - Оригинальный `AirCard-iOS.ipa`: его можно выбрать на диске или скачать через список релизов.
 - Способ установить созданный IPA: SideStore, LiveContainer, TrollStore или AltStore.
 
-> **Placeholder — добавь таблицу протестированной совместимости:** проверенные сборки iOS, версии AirCard-iOS и Mac на Apple Silicon/Intel.
+## Проверенная совместимость
+
+| Компонент | Проверенная конфигурация |
+| --- | --- |
+| iPhone | iPhone 14 Pro |
+| iOS | 26.5.2 |
+| AirCard-iOS | v1.3 |
+| AirCard Injector | v2.0.1 |
+| Mac | iMac (iMac19,1), Intel Core i5 |
+| macOS | 15.7.7 |
+| Архитектура | Intel (x86_64) |
 
 ## Как пользоваться
 
