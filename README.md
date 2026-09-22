@@ -28,7 +28,7 @@ It uses [idevice_pair](https://github.com/jkcoxson/idevice_pair) by [@jkcoxson](
 ## Demo
 
 <p align="center">
-  <img src="https://github.com/merybist/merybist/blob/865efa28afb07cd3f5b4f9bbf6473852dcf642be/0923.gif?raw=true" alt="AirCard Injector demo" width="640" />
+  <img src="https://raw.githubusercontent.com/merybist/merybist/865efa28afb07cd3f5b4f9bbf6473852dcf642be/0923.gif" alt="AirCard Injector demo" width="640" />
 </p>
 
 ## Requirements

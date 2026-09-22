@@ -28,7 +28,7 @@
 ## Демо
 
 <p align="center">
-  <img src="https://github.com/merybist/merybist/blob/865efa28afb07cd3f5b4f9bbf6473852dcf642be/0923.gif?raw=true" alt="Демо AirCard Injector" width="640" />
+  <img src="https://raw.githubusercontent.com/merybist/merybist/865efa28afb07cd3f5b4f9bbf6473852dcf642be/0923.gif" alt="Демо AirCard Injector" width="640" />
 </p>
 
 ## Требования
